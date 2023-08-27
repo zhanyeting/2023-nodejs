@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- <button id="btn"> 点击发送 jsonp 请求</button> -->
+    <script>
+        // var clickBtn = document.getElementById('btn');
+        // clickBtn.onclick = function() {
+        //     var oscript = document.createElement("script");
+        //     oscript.src = "http://localhost:3000/api/home?callback=test"
+
+        //     document.body.append(oscript);
+        // }
+
+        function test(value) { 
+            console.log(value);
+        }
+
+        // 使用fetch发送请求，测试 cors 跨域
+        fetch("http://localhost:3000/api/home")
+        .then(res => res.json())
+        .then(res => {
+            console.log(res);
+        })
+    </script>
+    <!-- <script src="http://127.0.0.1:3000/api/home?callback=test"></script> -->
+</body>
+</html>

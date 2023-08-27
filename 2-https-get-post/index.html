@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button id="maoyan">get 请求猫眼数据</button>
+    <button id="miyoupin">post 请求小米有品数据</button>
+    <button id="spider">爬虫 cheerio 猫眼网页</button>
+    <script>
+        // 直接访问猫眼数据，会有跨域的问题；
+        /* 解决方案：
+            使用node转发
+        */
+        // fetch("https://i.maoyan.com/api/mmdb/movie/v3/list/hot.json?ct=%E5%8C%97%E4%BA%AC&ci=1&channelId=4")
+        // fetch("http://127.0.0.1:3000/api/list")
+        // .then(res => res.json())
+        // .then(res => {
+        //     console.log(res);
+        // })
+
+
+        // 猫眼 get 请求
+        const maoyanBtn = document.getElementById("maoyan");
+        maoyanBtn.onclick = function () {
+            fetch("http://127.0.0.1:3000/api/maoyan")
+            .then(res => res.json())
+            .then(res => {
+                console.log(res);
+            })
+        }
+
+        // 小米有品 post 请求
+        const miyoupinBtn = document.getElementById("miyoupin");
+        miyoupinBtn.onclick = function () {
+            fetch("http://127.0.0.1:3000/api/xiaomiyoupin")
+            .then(res => res.json())
+            .then(res => {
+                console.log(res);
+            })
+        }
+
+
+        // 爬虫  猫眼网页 get 请求
+        const spiderBtn = document.getElementById("spider");
+        spiderBtn.onclick = function () {
+            fetch("http://127.0.0.1:3000/api/mapyan/splider")
+            .then(res => res.json())
+            .then(res => {
+                console.log(res);
+            })
+        }
+    </script>
+</body>
+</html>
