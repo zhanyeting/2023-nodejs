@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1>
+      后台系统 - 用户管理业务
+      <button id="logout" >退出登录</button>
+    </h1>
+
+    <div>
+      <div class="inline">用户名： <input type="text" id="username" /></div>
+      <div class="inline">密码： <input type="password" id="password" /></div>
+      <div class="inline">年龄： <input type="text" id="age" /></div>
+      <div class="inline"><button id="registerBtn">添加用户</button></div>
+      <hr/>
+
+      <div>
+        <button id="updateBtn">更新用户</button>
+        <input type="text" id="updateId"/>
+      </div>
+      <div>
+        <button id="deleteBtn">删除用户</button>
+        <input type="text" id="deleteId"/>
+      </div>
+    </div>
+    <hr/>
+
+    <h3>用户信息表（分页）
+      <input type="number" value='1' id="pageInput">
+    </h3>
+    <table>
+      <thead>
+        <tr>
+          <td>Id</td>
+          <td>用户名</td>
+          <td>年龄</td>
+        </tr>
+      </thead>
+      <tbody id="tbody-page"></tbody>
+    </table>
+    <hr/>
+
+    <h3>用户信息表（ALL）</h3>
+    <table>
+      <thead>
+        <tr>
+          <td>Id</td>
+          <td>用户名</td>
+          <td>密码</td>
+          <td>年龄</td>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+
+    <script>
+      const registerBtn = document.querySelector('#registerBtn');
+      const logoutBtn = document.querySelector('#logout');
+      const updateBtn = document.querySelector('#updateBtn');
+      const deleteBtn = document.querySelector('#deleteBtn');
+
+      const tbody = document.querySelector('#tbody');
+      const tbodyPage = document.querySelector('#tbody-page');
+      const pageInput = document.querySelector('#pageInput');
+
+      registerBtn.onclick = function () {
+        const username = document.getElementById("username");
+        const password = document.getElementById("password");
+        const age = document.getElementById("age");
+
+        console.log(100, username.value, password.value, age.value);
+        fetch('/api/user', {
+          method: 'POST',
+          body: JSON.stringify({
+            username: username.value,
+            password: password.value,
+            age: age.value,
+          }),
+          headers: {
+            "content-type": "application/json; charset=utf-8",
+          }
+        }).then(res => res.json()).then((res) => {
+          // 如果 ok 为 0 ，表示 session 过期了， 跳转到登陆页面
+          if (res?.ok === 0) {
+            location.href = '/login';
+            return 
+          }
+          getListALL();
+          // alert('注册成功');
+        });
+      }
+
+
+      updateBtn.onclick = function () {
+        const username = document.getElementById("username");
+        const password = document.getElementById("password");
+        const age = document.getElementById("age");
+        const id = document.getElementById('updateId');
+
+        if (!id?.value) {
+          alert('请先输入 id ');
+          return;
+        }
+
+        fetch(`/api/user/${id.value}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            username: username.value,
+            password: password.value,
+            age: age.value,
+          }),
+          headers: {
+            "content-type": "application/json; charset=utf-8",
+          }
+        }).then(res => res.json()).then((res) => {
+          // 如果 ok 为 0 ，表示 session 过期了， 跳转到登陆页面
+          if (res?.ok === 0) {
+            location.href = '/login';
+            return
+          }
+          getListALL();
+          // alert('update 成功');
+        });
+      }
+
+
+      deleteBtn.onclick = function () {
+        const username = document.getElementById("username");
+        const password = document.getElementById("password");
+        const age = document.getElementById("age");
+        const id = document.getElementById('deleteId');
+
+        if (!id?.value) {
+          alert('请先输入 id ');
+          return;
+        }
+        
+        fetch(`/api/user/${id.value}`, {
+          method: 'DELETE',
+        }).then(res => res.json()).then((res) => {
+          // 如果 ok 为 0 ，表示 session 过期了， 跳转到登陆页面
+          if (res?.ok === 0) {
+            location.href = '/login';
+            return
+          }
+          getListALL();
+          // alert('delete 成功');
+        });
+      }
+
+      pageInput.onclick = function() {
+        const pageNo = pageInput.value;
+        console.log("pageNo === ", pageNo);
+        getListByPage(pageNo);
+      }
+
+  getListALL();
+  function getListALL () {
+    fetch('/api/user').then(res => res.json()).then((res) => {
+        // 如果 ok 为 0 ，表示 session 过期了， 跳转到登陆页面
+        if (res?.ok === 0) {
+          location.href = '/login';
+          return
+        }
+
+        console.log(res);
+        tbody.innerHTML = (res?.data || []).map(item => `
+          <tr>
+            <td>${item._id}</td>
+            <td>${item.username}</td>
+            <td>${item.password}</td>
+            <td>${item.age}</td>
+          </tr>
+        `).join('');
+      })
+  }
+
+  getListByPage();
+  function getListByPage (pageNo = 1) {
+    fetch('/api/user?pageNo='+pageNo+'&pageSize=2').then(res => res.json()).then((res) => {
+        // 如果 ok 为 0 ，表示 session 过期了， 跳转到登陆页面
+        if (res?.ok === 0) {
+            location.href = '/login';
+            return
+        }  
+        console.log(res);
+        tbodyPage.innerHTML = (res?.data || []).map(item => `
+          <tr>
+            <td>${item._id}</td>
+            <td>${item.username}</td>
+            <td>${item.age}</td>
+          </tr>
+        `).join('');
+      })
+  }
+      
+  logoutBtn.onclick = () => {
+    fetch('/api/logout').then(res => res.json()).then(res => {
+      if (res?.ok === 1){
+        location.href = '/login';
+      } else {
+        alert('退出登录失败');
+      }
+    })
+  }
+    
+      
+    </script>
+  </body>
+</html>

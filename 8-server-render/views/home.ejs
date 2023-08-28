@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <%# 这里是引入资源，还可以穿参数过去　%>
+    <%-include('./header.ejs', {isShowTitle: true}) %>
+
+    <h1>home page</h1>
+
+    <ul>
+        <% for(let i=0; i<list.length; i++) { %>
+            <li><%=list[i]%></li>
+            <li><%-list[i]%></li>
+        <% } %>
+    </ul>
+
+    <div>最新消息-<%= myhtml%></div>
+    <div>最新消息-<%- myhtml%></div>
+
+    <!-- 我是看得见的注释 -->
+    <%# 我是看不见的注释  %>
+</body>
+</html>

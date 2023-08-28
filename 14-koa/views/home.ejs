@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/css/style.css' />
+  </head>
+  <body>
+    <h1><%= title %>, Welcome to Express</h1>
+    <hr/>
+
+    <h3>MongoDb 对 User 增删改查的演示</h3>
+    <div>
+      <div class="inline">用户名： <input type="text" id="username" /></div>
+      <div class="inline">密码： <input type="password" id="password" /></div>
+      <div class="inline">年龄： <input type="text" id="age" /></div>
+      <div class="inline"><button id="registerBtn">注册</button></div>
+      <div>
+        <button id="updateBtn">更新</button>
+        <input type="text" id="updateId"/>
+      </div>
+      <div>
+        <button id="deleteBtn">删除</button>
+        <input type="text" id="deleteId"/>
+      </div>
+        <!-- <button type="button" onclick="updateOne()">更新</button> -->
+    </div>
+    <hr/>
+
+    <h3>用户信息表（分页）
+      <input type="number" value='1' id="pageInput">
+    </h3>
+    <table>
+      <thead>
+        <tr>
+          <td>Id</td>
+          <td>用户名</td>
+          <td>年龄</td>
+        </tr>
+      </thead>
+      <tbody id="tbody-page"></tbody>
+    </table>
+    <hr/>
+
+    <h3>用户信息表（ALL）</h3>
+    <table>
+      <thead>
+        <tr>
+          <td>Id</td>
+          <td>用户名</td>
+          <td>密码</td>
+          <td>年龄</td>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+
+    <script>
+      const registerBtn = document.querySelector('#registerBtn');
+      const updateBtn = document.querySelector('#updateBtn');
+      const deleteBtn = document.querySelector('#deleteBtn');
+
+      const tbody = document.querySelector('#tbody');
+      const tbodyPage = document.querySelector('#tbody-page');
+      const pageInput = document.querySelector('#pageInput');
+
+      registerBtn.onclick = function () {
+        const username = document.getElementById("username");
+        const password = document.getElementById("password");
+        const age = document.getElementById("age");
+
+        console.log(100, username.value, password.value, age.value);
+        fetch('/api/user', {
+          method: 'POST',
+          body: JSON.stringify({
+            username: username.value,
+            password: password.value,
+            age: age.value,
+          }),
+          headers: {
+            "content-type": "application/json; charset=utf-8",
+          }
+        }).then(res => res.json()).then((res) => {
+          getListALL();
+          alert('注册成功');
+        });
+      }
+
+
+      updateBtn.onclick = function () {
+        const username = document.getElementById("username");
+        const password = document.getElementById("password");
+        const age = document.getElementById("age");
+        const id = document.getElementById('updateId');
+
+        if (!id?.value) {
+          alert('请先输入 id ');
+          return;
+        }
+
+        fetch(`/api/user/${id.value}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            username: username.value,
+            password: password.value,
+            age: age.value,
+          }),
+          headers: {
+            "content-type": "application/json; charset=utf-8",
+          }
+        }).then(res => res.json()).then((res) => {
+          getListALL();
+          alert('update 成功');
+        });
+      }
+
+
+      deleteBtn.onclick = function () {
+        const username = document.getElementById("username");
+        const password = document.getElementById("password");
+        const age = document.getElementById("age");
+        const id = document.getElementById('deleteId');
+
+        if (!id?.value) {
+          alert('请先输入 id ');
+          return;
+        }
+        
+        fetch(`/api/user/${id.value}`,{
+          method: 'DELETE',
+        }).then(res => res.json()).then((res) => {
+          getListALL();
+          alert('delete 成功');
+        });
+      }
+
+      pageInput.onclick = function() {
+        const pageNo = pageInput.value;
+        console.log("pageNo === ", pageNo);
+        getListByPage(pageNo);
+      }
+
+  getListALL();
+  function getListALL () {
+    fetch('/api/user').then(res => res.json()).then((res) => {
+        console.log(res);
+        tbody.innerHTML = (res?.data || []).map(item => `
+          <tr>
+            <td>${item._id}</td>
+            <td>${item.username}</td>
+            <td>${item.password}</td>
+            <td>${item.age}</td>
+          </tr>
+        `).join('');
+      })
+  }
+
+  getListByPage();
+  function getListByPage (pageNo = 1) {
+    fetch('/api/user?pageNo='+pageNo+'&pageSize=2').then(res => res.json()).then((res) => {
+        console.log(res);
+        tbodyPage.innerHTML = (res?.data || []).map(item => `
+          <tr>
+            <td>${item._id}</td>
+            <td>${item.username}</td>
+            <td>${item.age}</td>
+          </tr>
+        `).join('');
+      })
+  }
+      
+
+    
+      
+    </script>
+  </body>
+</html>

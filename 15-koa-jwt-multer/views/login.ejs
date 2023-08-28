@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/login.css">
+    <title>Login Page</title>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+      // 拦截器， request
+      axios.interceptors.request.use(function (config) {
+          // Do something before request is sent
+          // console.log("请求发出前，执行的方法")
+          return config;
+        }, function (error) {
+          // Do something with request error
+          return Promise.reject(error);
+        });
+
+
+      // 拦截器 - response
+      axios.interceptors.response.use(function (response) {
+          // Any status code that lie within the range of 2xx cause this function to trigger
+          // Do something with response data
+
+            console.log("请求成功后 ，第一个调用的方法", response)
+            const token = response.headers?.authorization;
+            // login请求响应后，设置token到本地 localStorage 中
+            !!token && localStorage.setItem('token', token);
+          
+          return response;
+        }, function (error) {
+          // Any status codes that falls outside the range of 2xx cause this function to trigger
+          // Do something with response error
+          return Promise.reject(error);
+        });
+    </script>
+</head>
+<body>
+    <h1> Login 页面</h1>
+
+    <!-- <form id="form" action="/login" method="post"> -->
+        <div>用户名： <input type="text" id="username" /></div>
+        <div>密码： <input type="password" id="password" /></div>
+        <div><button id="login">登陆</button></div>
+    <!-- </form> -->
+
+    <p class="error"></p>
+    
+    <!-- <script src="/js/login.js"></script> -->
+    <script>
+        const username = document.getElementById('username');
+        const password = document.getElementById('password');
+        const loginBtn = document.getElementById('login');
+        const errTag = document.querySelector('.error');
+
+        loginBtn.onclick = () => {
+            console.log("login ==", username.value, password.value);
+
+            axios.post('/login', {
+                "username": username.value,
+                "password": password.value
+            }).then(res => {
+                console.log(111, res);
+                if (res.data?.ok === 1) {
+                    location.href = '/';
+                } else {
+                    errTag.innerHTML = '用户名和密码不匹配'
+                }
+            })
+        }
+    </script>
+</body>
+</html>

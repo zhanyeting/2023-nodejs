@@ -1,0 +1,19 @@
+<header>
+    <% if(isShowTitle) { %>
+        <p class="special"> 这是特殊部分 --- 仅在特定场景下才展示 </p>
+    <% } %>
+    <p class="head">这是公共 header 部分</p>
+</header>
+
+<style>
+    header{
+        background-color: lightgreen;
+    }
+    .head {
+        color: violet;
+    }
+
+    .special {
+        color: salmon;
+    }
+</style>

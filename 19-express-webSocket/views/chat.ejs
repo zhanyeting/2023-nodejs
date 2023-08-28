@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+</head>
+<body>
+    <h1>Chat 聊天室</h1>
+    <input type="text" id="text"/>
+    <select id="userSel"></select>
+    <button type="button" id="sendBtn">发送</button>
+
+    <script>
+        const text = document.getElementById("text");
+        const userSel = document.getElementById("userSel");
+        const sendBtn = document.getElementById("sendBtn");
+
+        const WebSocketType = {
+            Error: 0,      // 错误
+            GroupList: 1,  // 获取列表
+            GroupChat: 2,  // 群聊
+            SingleChat: 3, // 私聊 
+        }
+
+        // websocket 带上 token 通信 （JWT）
+        const ws = new WebSocket('ws://localhost:8080?token='+localStorage.getItem('token'));
+
+        ws.onopen = function () {
+            console.log("websocket 连接成功.....");
+            // 客户端 发送一个《群聊》消息给 服务端
+            ws.send(createMessage(WebSocketType.GroupChat, "大家好！"))
+        }
+
+        ws.onmessage = function (e) {
+            // console.log(e?.data);
+            const msgObj = JSON.parse(e?.data);
+            switch (msgObj.type) {
+                case WebSocketType.Error:
+                    // token过期，跳转到登录页
+                    localStorage.removeItem("token")
+                    location.href = '/login';
+                    break;
+
+                case WebSocketType.GroupList:
+                    const userList = msgObj.data || [];
+                    // console.log(msgObj.data);
+                    userSel.innerHTML = '';
+                    userSel.innerHTML = '<option value="all">all</option>' + userList.map(item => `
+                        <option value="${item.username}">${item.username}</option>
+                    `).join('');
+                    break;
+
+                case WebSocketType.GroupChat:
+                    const user = msgObj?.user ? msgObj.user?.username : '系统广播';
+                    console.log(`${user}: ${msgObj.data}`);
+                    
+                    break;
+
+                case WebSocketType.SingleChat:
+                    const chatObj = userSel?.value;
+                    console.log(`${msgObj.user?.username}: ${msgObj.data}`);
+                    break;
+            
+                default:
+                    break;
+            }
+        }
+
+        ws.error = (error) => {
+            console.log("error === ", error);
+        }
+
+        // 客户端 发送一个《群聊》消息给 服务端
+        // ws.send(createMessage(WebSocketType.GroupChat, "大家好！"))
+
+        function createMessage (type, data, to) {
+            return JSON.stringify({type, data, to});
+        }
+
+        sendBtn.onclick = function () {
+            // console.log(text?.value, userSel.value);
+            if (!text.value) {
+                alert('请输入消息后再发送！')
+                return;
+            }
+
+            if (userSel?.value === 'all') {
+                ws.send(createMessage(WebSocketType.GroupChat, text.value))
+            } else {
+                ws.send(createMessage(WebSocketType.SingleChat, text.value, userSel.value))
+            }
+        }
+    </script>
+</body>
+</html>
